@@ -5,7 +5,12 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/todo-db';
+let MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/todo-db';
+
+// MONGO_URI가 슬래시로 끝나면 데이터베이스 이름 추가
+if (MONGO_URI && MONGO_URI.endsWith('/')) {
+  MONGO_URI = MONGO_URI + 'todo-app';
+}
 
 // 환경변수 확인 로그
 console.log('📋 환경변수 확인:');
