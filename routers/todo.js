@@ -21,6 +21,15 @@ router.get('/', async (req, res) => {
     res.status(200).json(todos);
   } catch (error) {
     console.error('할일 조회 에러:', error);
+    
+    // MongoDB 연결 상태 재확인
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: '데이터베이스 연결 실패', 
+        message: 'MongoDB에 연결할 수 없습니다. 서버 관리자에게 문의하세요.' 
+      });
+    }
+    
     res.status(500).json({ 
       error: '할일 조회 실패', 
       message: error.message 
@@ -65,6 +74,14 @@ router.post('/', async (req, res) => {
 // 할일 수정
 router.put('/:id', async (req, res) => {
   try {
+    // MongoDB 연결 상태 확인
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: '데이터베이스 연결 실패', 
+        message: 'MongoDB에 연결할 수 없습니다. 서버 관리자에게 문의하세요.' 
+      });
+    }
+    
     const { id } = req.params;
     const { title, deadline, completed } = req.body;  // deadline, completed 추가
 
@@ -103,6 +120,14 @@ router.put('/:id', async (req, res) => {
 // 할일 삭제
 router.delete('/:id', async (req, res) => {
   try {
+    // MongoDB 연결 상태 확인
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: '데이터베이스 연결 실패', 
+        message: 'MongoDB에 연결할 수 없습니다. 서버 관리자에게 문의하세요.' 
+      });
+    }
+    
     const { id } = req.params;
 
     const todo = await Todo.findByIdAndDelete(id);
