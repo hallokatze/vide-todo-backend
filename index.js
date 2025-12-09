@@ -9,7 +9,12 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/todo-db';
 
 // 환경변수 확인 로그
 console.log('📋 환경변수 확인:');
-console.log('MONGO_URI:', MONGO_URI ? `${MONGO_URI.substring(0, 20)}...` : '없음');
+console.log('MONGO_URI 존재 여부:', MONGO_URI ? '있음' : '없음');
+if (MONGO_URI) {
+  // 민감한 정보는 마스킹
+  const maskedURI = MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@');
+  console.log('MONGO_URI (마스킹):', maskedURI);
+}
 
 // Middleware
 app.use(cors({
@@ -45,8 +50,10 @@ app.use('/todos', todoRouter);
 const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000, // 5초 타임아웃
+  serverSelectionTimeoutMS: 30000, // 30초 타임아웃 (증가)
   socketTimeoutMS: 45000, // 소켓 타임아웃
+  connectTimeoutMS: 30000, // 연결 타임아웃 추가
+  maxPoolSize: 10, // 연결 풀 크기
 };
 
 // MongoDB 연결 상태 이벤트 리스너
@@ -60,17 +67,31 @@ mongoose.connection.on('error', (err) => {
 
 // MongoDB 연결 후 서버 시작
 async function startServer() {
+  if (!MONGO_URI) {
+    console.error('❌ MONGO_URI가 설정되지 않았습니다!');
+    console.error('Heroku Config Vars에 MONGO_URI를 설정해주세요.');
+    process.exit(1);
+  }
+
+  console.log('🔄 MongoDB 연결 시도 중...');
   try {
     await mongoose.connect(MONGO_URI, mongooseOptions);
     console.log('✅ MongoDB 연결 성공');
     console.log('📊 연결된 데이터베이스:', mongoose.connection.db.databaseName);
+    console.log('📊 연결 상태:', mongoose.connection.readyState === 1 ? '연결됨' : '연결 안됨');
     
     // MongoDB 연결 성공 후 서버 시작
     app.listen(PORT, () => {
       console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
     });
   } catch (err) {
-    console.error('❌ MongoDB 연결 실패:', err.message);
+    console.error('❌ MongoDB 연결 실패:');
+    console.error('에러 메시지:', err.message);
+    console.error('에러 이름:', err.name);
+    if (err.reason) {
+      console.error('에러 이유:', err.reason);
+    }
+    console.error('전체 에러 스택:', err.stack);
     console.error('⚠️ 서버는 계속 실행되지만 MongoDB 연결 없이 동작합니다.');
     
     // 연결 실패해도 서버는 시작 (Heroku 요구사항)

@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -7,6 +8,14 @@ const Todo = require('../models/Todo');
 // 할일 목록 조회
 router.get('/', async (req, res) => {
   try {
+    // MongoDB 연결 상태 확인
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: '데이터베이스 연결 실패', 
+        message: 'MongoDB에 연결할 수 없습니다. 서버 관리자에게 문의하세요.' 
+      });
+    }
+    
     const todos = await Todo.find().sort({ createdAt: -1 });
     console.log(`📋 할일 목록 조회: ${todos.length}개`);
     res.status(200).json(todos);
@@ -22,6 +31,14 @@ router.get('/', async (req, res) => {
 // 할일 생성
 router.post('/', async (req, res) => {
   try {
+    // MongoDB 연결 상태 확인
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: '데이터베이스 연결 실패', 
+        message: 'MongoDB에 연결할 수 없습니다. 서버 관리자에게 문의하세요.' 
+      });
+    }
+    
     const { title, deadline } = req.body;  // deadline 추가
 
     if (!title) {
