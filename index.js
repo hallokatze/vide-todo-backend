@@ -15,6 +15,19 @@ console.log('MONGO_URI:', MONGO_URI ? `${MONGO_URI.substring(0, 20)}...` : '없�
 app.use(cors());
 app.use(express.json());
 
+// 기본 라우트
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Todo Backend API 서버가 실행 중입니다.',
+    endpoints: {
+      'GET /todos': '할일 목록 조회',
+      'POST /todos': '할일 생성',
+      'PUT /todos/:id': '할일 수정',
+      'DELETE /todos/:id': '할일 삭제'
+    }
+  });
+});
+
 // 라우터
 const todoRouter = require('./routers/todo');
 app.use('/api/todos', todoRouter);
@@ -34,7 +47,8 @@ mongoose.connect(MONGO_URI, mongooseOptions)
   })
   .catch((err) => {
     console.error('❌ MongoDB 연결 실패:', err.message);
-    process.exit(1); // 연결 실패 시 서버 종료
+    console.error('⚠️ 서버는 계속 실행되지만 MongoDB 연결 없이 동작합니다.');
+    // Heroku에서는 연결 실패 시에도 서버가 계속 실행되도록 함
   });
 
 // MongoDB 연결 상태 이벤트 리스너
