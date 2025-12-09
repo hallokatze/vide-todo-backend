@@ -16,8 +16,10 @@ app.use(cors({
   origin: [
     'https://vibe-todo-frontend-8c1ms786r-heathers-projects-81cf1aab.vercel.app',
     'https://vibe-todo-frontend-delta.vercel.app',
+    'https://vibe-todo-frontend-kg2m6egxv-heathers-projects-81cf1aab.vercel.app', // 현재 URL 추가
     'http://localhost:5173'
-  ]
+  ],
+  credentials: true // 필요시 추가
 }));
 app.use(express.json());
 
