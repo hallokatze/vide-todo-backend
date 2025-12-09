@@ -53,14 +53,10 @@ app.use('/todos', todoRouter);
 
 // MongoDB 연결 옵션
 const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 30000, // 30초 타임아웃 (증가)
+  serverSelectionTimeoutMS: 30000, // 30초 타임아웃
   socketTimeoutMS: 45000, // 소켓 타임아웃
-  connectTimeoutMS: 30000, // 연결 타임아웃 추가
+  connectTimeoutMS: 30000, // 연결 타임아웃
   maxPoolSize: 10, // 연결 풀 크기
-  bufferMaxEntries: 0, // 버퍼링 비활성화 (연결 실패 시 즉시 에러)
-  bufferCommands: false, // 버퍼링 비활성화
 };
 
 // MongoDB 연결 상태 이벤트 리스너
