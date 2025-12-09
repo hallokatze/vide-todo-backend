@@ -76,8 +76,13 @@ async function startServer() {
   }
 
   console.log('🔄 MongoDB 연결 시도 중...');
+  console.log('연결 문자열 길이:', MONGO_URI ? MONGO_URI.length : 0);
+  console.log('연결 문자열 시작:', MONGO_URI ? MONGO_URI.substring(0, 30) : '없음');
+  
   try {
+    console.log('mongoose.connect() 호출 시작...');
     await mongoose.connect(MONGO_URI, mongooseOptions);
+    console.log('mongoose.connect() 완료');
     console.log('✅ MongoDB 연결 성공');
     console.log('📊 연결된 데이터베이스:', mongoose.connection.db.databaseName);
     console.log('📊 연결 상태:', mongoose.connection.readyState === 1 ? '연결됨' : '연결 안됨');
