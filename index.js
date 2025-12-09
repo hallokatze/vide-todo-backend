@@ -97,13 +97,19 @@ async function startServer() {
       console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
     });
   } catch (err) {
-    console.error('❌ MongoDB 연결 실패:');
-    console.error('에러 메시지:', err.message);
+    console.error('========================================');
+    console.error('❌ MongoDB 연결 실패');
+    console.error('========================================');
     console.error('에러 이름:', err.name);
+    console.error('에러 메시지:', err.message);
     if (err.reason) {
       console.error('에러 이유:', err.reason);
     }
-    console.error('전체 에러 스택:', err.stack);
+    if (err.code) {
+      console.error('에러 코드:', err.code);
+    }
+    console.error('전체 에러:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    console.error('========================================');
     console.error('⚠️ 서버는 계속 실행되지만 MongoDB 연결 없이 동작합니다.');
     
     // 연결 실패해도 서버는 시작 (Heroku 요구사항)
