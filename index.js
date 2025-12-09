@@ -12,7 +12,13 @@ console.log('📋 환경변수 확인:');
 console.log('MONGO_URI:', MONGO_URI ? `${MONGO_URI.substring(0, 20)}...` : '없음');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://vibe-todo-frontend-8c1ms786r-heathers-projects-81cf1aab.vercel.app',
+    'https://vibe-todo-frontend-delta.vercel.app',
+    'http://localhost:5173'
+  ]
+}));
 app.use(express.json());
 
 // 기본 라우트
