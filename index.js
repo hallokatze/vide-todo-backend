@@ -80,9 +80,12 @@ async function startServer() {
     process.exit(1);
   }
 
+  console.log('========================================');
   console.log('🔄 MongoDB 연결 시도 중...');
   console.log('연결 문자열 길이:', MONGO_URI ? MONGO_URI.length : 0);
-  console.log('연결 문자열 시작:', MONGO_URI ? MONGO_URI.substring(0, 30) : '없음');
+  const maskedURI = MONGO_URI ? MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//$1:***@') : '없음';
+  console.log('연결 문자열 (마스킹):', maskedURI);
+  console.log('========================================');
   
   try {
     console.log('mongoose.connect() 호출 시작...');
@@ -97,20 +100,23 @@ async function startServer() {
       console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
     });
   } catch (err) {
+    console.error('');
     console.error('========================================');
     console.error('❌ MongoDB 연결 실패');
     console.error('========================================');
-    console.error('에러 이름:', err.name);
-    console.error('에러 메시지:', err.message);
+    console.error('에러 이름:', err.name || '없음');
+    console.error('에러 메시지:', err.message || '없음');
+    console.error('에러 코드:', err.code || '없음');
     if (err.reason) {
       console.error('에러 이유:', err.reason);
     }
-    if (err.code) {
-      console.error('에러 코드:', err.code);
+    if (err.codeName) {
+      console.error('에러 코드명:', err.codeName);
     }
-    console.error('전체 에러:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    console.error('에러 스택 (처음 500자):', err.stack ? err.stack.substring(0, 500) : '없음');
     console.error('========================================');
     console.error('⚠️ 서버는 계속 실행되지만 MongoDB 연결 없이 동작합니다.');
+    console.error('');
     
     // 연결 실패해도 서버는 시작 (Heroku 요구사항)
     app.listen(PORT, () => {
