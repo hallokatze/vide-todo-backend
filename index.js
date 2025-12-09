@@ -37,19 +37,9 @@ app.use('/todos', todoRouter);
 const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000, // 5초 타임아웃
+  socketTimeoutMS: 45000, // 소켓 타임아웃
 };
-
-// MongoDB 연결
-mongoose.connect(MONGO_URI, mongooseOptions)
-  .then(() => {
-    console.log('✅ MongoDB 연결 성공');
-    console.log('📊 연결된 데이터베이스:', mongoose.connection.db.databaseName);
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB 연결 실패:', err.message);
-    console.error('⚠️ 서버는 계속 실행되지만 MongoDB 연결 없이 동작합니다.');
-    // Heroku에서는 연결 실패 시에도 서버가 계속 실행되도록 함
-  });
 
 // MongoDB 연결 상태 이벤트 리스너
 mongoose.connection.on('disconnected', () => {
@@ -60,8 +50,28 @@ mongoose.connection.on('error', (err) => {
   console.error('❌ MongoDB 연결 에러:', err);
 });
 
-// 서버 실행
-app.listen(PORT, () => {
-  console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
-});
+// MongoDB 연결 후 서버 시작
+async function startServer() {
+  try {
+    await mongoose.connect(MONGO_URI, mongooseOptions);
+    console.log('✅ MongoDB 연결 성공');
+    console.log('📊 연결된 데이터베이스:', mongoose.connection.db.databaseName);
+    
+    // MongoDB 연결 성공 후 서버 시작
+    app.listen(PORT, () => {
+      console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
+    });
+  } catch (err) {
+    console.error('❌ MongoDB 연결 실패:', err.message);
+    console.error('⚠️ 서버는 계속 실행되지만 MongoDB 연결 없이 동작합니다.');
+    
+    // 연결 실패해도 서버는 시작 (Heroku 요구사항)
+    app.listen(PORT, () => {
+      console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다. (MongoDB 연결 없음)`);
+    });
+  }
+}
+
+// 서버 시작
+startServer();
 
